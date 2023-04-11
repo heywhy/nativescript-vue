@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp } from "nativescript-vue";
 
 // @ts-ignore
 global.window = global;
