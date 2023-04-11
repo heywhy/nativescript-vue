@@ -1,43 +1,62 @@
-const { VueLoaderPlugin } = require("vue-loader");
+/**
+ * Patch module resolution till https://github.com/vuejs/vue-loader/issues/2031
+ * gets resolved by the vue team.
+ */
+const { Module } = require('module')
+const fn = Module._resolveFilename
+
+Module._resolveFilename = (...args) => {
+  if (args[0] == 'vue/compiler-sfc') {
+    return require.resolve('@vue/compiler-sfc') 
+  }
+  
+  return fn(...args)
+}
+
+const path = require('path')
+const { VueLoaderPlugin } = require('vue-loader');
 
 /**
- * @param {typeof import("@nativescript/webpack")} webpack
+ * @param {typeof import('@nativescript/webpack')} webpack
  */
 module.exports = (webpack) => {
-  webpack.useConfig("vue");
+  webpack.useConfig('vue');
 
-  webpack.chainWebpack((config) => {
-    config.resolve.alias.set('vue', 'nativescript-vue');
-    
-    config.plugin("VueLoaderPlugin").use(VueLoaderPlugin);
+  const projectRoot = webpack.Utils.project.getProjectRootPath();
 
-    config.module
-      .rule("vue")
-      .test(/\.vue$/)
-      .use("vue-loader")
-      .loader(require.resolve("vue-loader"))
-      .tap((options) => {
-        return {
-          ...options,
-          isServerBuild: false,
-          compilerOptions: {
-            // isCustomElement: (el) => el.toLowerCase() === 'label',
-            // transformHoist: null
-          },
-        };
-      });
+  webpack.chainWebpack(config => {
+    // try to resolve loaders from the project node_modules before others
+    config.resolveLoader.modules
+      .prepend(path.resolve(projectRoot, 'node_modules'));
 
-    config.plugin("DefinePlugin").tap((args) => {
+    config.module.rules
+      .get('css')
+      .uses.get('vue-css-loader')
+      .loader('vue-loader/dist/stylePostLoader.js')
+
+    config.module.rules
+      .get('scss')
+      .uses.get('vue-css-loader')
+      .loader('vue-loader/dist/stylePostLoader.js')
+
+    config.module.rules
+      .get('vue')
+      .uses.get('vue-loader')
+      .tap(options => ({ ...options, isServerBuild: false }))
+
+    config.plugins.get('VueLoaderPlugin').use(VueLoaderPlugin)
+
+    config.plugin('DefinePlugin').tap((args) => {
       Object.assign(args[0], {
         __VUE_OPTIONS_API__: true,
         __VUE_PROD_DEVTOOLS__: false,
       });
 
       return args;
-    });
+    })
 
     // disable vue fork ts checker, as it doesn't work with vue3 yet?
-    config.plugin("ForkTsCheckerWebpackPlugin").tap((args) => {
+    config.plugin('ForkTsCheckerWebpackPlugin').tap((args) => {
       args[0] = webpack.merge(args[0], {
         typescript: {
           extensions: {
