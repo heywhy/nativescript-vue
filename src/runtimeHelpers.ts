@@ -5,8 +5,6 @@ import { renderer } from "./renderer";
 
 type Props = Record<string, unknown>
 
-const __DEV__ = true;
-
 let rootContext: AppContext = null;
 
 export const setRootContext = (context: AppContext) => {
@@ -30,7 +28,7 @@ export const createNativeView = <T = View>(component: Component, props?: Props) 
       vnode = h(component, props);
 
       vnode.appContext = context;
-      
+
       renderer.render(vnode, root);
 
       isMounted = true;

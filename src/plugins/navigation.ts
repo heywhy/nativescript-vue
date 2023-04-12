@@ -1,11 +1,10 @@
-import { App, Component, Ref, unref } from "@vue/runtime-core";
-import { Frame, NavigationEntry, Page } from "@nativescript/core";
-import { NSVElement, NSVRoot } from "../dom";
-import { NavigatedData } from "@nativescript/core";
-import { createNativeView } from "../runtimeHelpers";
+import { App, Component, Ref, nextTick, unref } from "@vue/runtime-core"
+import { Frame, NavigationEntry, Page } from "@nativescript/core"
+import { NSVElement } from "../dom"
+import { createNativeView } from "../runtimeHelpers"
 
 declare module "@vue/runtime-core" {
-  export interface ComponentCustomProperties {
+  interface ComponentCustomProperties {
     /**
      * todo: update docblock
      * Navigate to {target} component.
@@ -17,7 +16,7 @@ declare module "@vue/runtime-core" {
     $navigateTo: (
       target: Component,
       options?: NavigationOptions
-    ) => Promise<any>;
+    ) => void;
     $navigateBack: (options?: NavigationOptions) => void;
   }
 }
@@ -62,62 +61,10 @@ function resolveFrame(frame?: ResolvableFrame): Frame {
   return Frame.getFrameById(ob);
 }
 
-function createNavigationRoot(cb: (view: any) => void) {
-  const defaultRoot = new NSVRoot();
-
-  // flag to indicate when we need to call resetRoot
-  // usually happens when the root component is re-mounted (HMR)
-  let shouldResetRoot = false;
-
-  const appendChild = defaultRoot.appendChild.bind(defaultRoot);
-  const removeChild = defaultRoot.removeChild.bind(defaultRoot);
-
-  defaultRoot.removeChild = (el) => {
-    removeChild(el);
-
-    shouldResetRoot = true;
-    // console.log("remove child", (el as NSVElement).tagName);
-  };
-
-  defaultRoot.appendChild = (el) => {
-    appendChild(el);
-
-    if (shouldResetRoot) {
-      shouldResetRoot = false;
-      // console.log("append child", (el as NSVElement).tagName);
-      cb((el as NSVElement).nativeView);
-    }
-  };
-
-  return defaultRoot;
-}
-
-function attachDisposeCallbacks(
-  targetPage: Page,
-  disposeCallback: (targetPage: Page) => void
-) {
-  // const handler = (args: NavigatedData) => {
-  //   if (args.isBackNavigation) {
-  //     console.log("navigatedFrom called.");
-  //     targetPage.off("navigatedFrom", handler as any);
-  //     disposeCallback();
-  //   }
-  // };
-  // targetPage.on("navigatedFrom", handler);
-
-  const dispose = targetPage.disposeNativeView;
-  targetPage.disposeNativeView = () => {
-    // console.log("dispose native view called.");
-    disposeCallback(targetPage);
-    dispose.call(targetPage);
-  };
-}
-
-export async function $navigateTo(
+export function $navigateTo(
   target: Component,
   options?: NavigationOptions
-): Promise<Page> {
-  options = Object.assign({}, options);
+) {
   // console.log("$navigateTo");
 
   try {
@@ -127,49 +74,26 @@ export async function $navigateTo(
       throw new Error("Failed to resolve frame. Make sure your frame exists.");
     }
 
-    const cleanup = (page) => {
-      if (page === latestPage) {
-        // console.log("DISPOSE NAVIGATION APP");
-        view.unmount()
-        view = null
-        navRoot = null
-      } else {
-        // console.log("no dispose we have replaced page");
-      }
+    let view = createNativeView<Page>(target, options.props);
+
+    const page = view.mount();
+    const dispose = page.disposeNativeView;
+
+    page.disposeNativeView = () => {
+      dispose.call(page);
+
+      nextTick(() => {
+        view.unmount();
+        view = null;
+      })
     };
-
-    let navRoot = createNavigationRoot((newPage) => {
-      latestPage = newPage;
-      attachDisposeCallbacks(newPage, cleanup);
-      // cache the original transition of the current page
-      const originalTransition = frame.currentEntry.transition;
-      // replace current page
-      frame.replacePage({
-        ...options,
-        transition: {
-          name: "fade",
-          duration: 10,
-        },
-        create: () => newPage,
-      });
-      // reset the transition to the original one
-      frame.once("navigatedTo", () => {
-        frame.currentEntry.transition = originalTransition;
-      });
-    });
-
-    let view = createNativeView<Page>(target, options.props)
-
-    const targetPage = view.mount(navRoot)
-
-    let latestPage = targetPage;
-    attachDisposeCallbacks(targetPage, cleanup);
 
     frame.navigate({
       ...options,
-      create: () => targetPage,
+      create: () => page,
     });
-    return targetPage;
+
+    return page;
   } catch (e) {
     console.error("[$navigateTo] Failed to navigate:\n\n");
     console.error(e, e.stack);
@@ -177,8 +101,8 @@ export async function $navigateTo(
   }
 }
 
-export async function $navigateBack(options?: BackNavigationOptions) {
-  const frame = resolveFrame(options ? options.frame : undefined);
+export function $navigateBack(options?: BackNavigationOptions) {
+  const frame = resolveFrame(options?.frame);
 
   if (!frame) {
     throw new Error("Failed to resolve frame. Make sure your frame exists.");

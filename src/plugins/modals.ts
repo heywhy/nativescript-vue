@@ -12,7 +12,7 @@ import { NSVElement } from "../dom";
 import { createNativeView } from "../runtimeHelpers";
 
 declare module "@vue/runtime-core" {
-  export interface ComponentCustomProperties {
+  interface ComponentCustomProperties {
     /**
      * todo: update docblock
      */
