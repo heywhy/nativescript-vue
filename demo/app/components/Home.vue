@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import Test from "./Test.vue";
 import { goHome } from "~/composables/goHome";
-import { onUnmounted } from "vue";
+import { ListItem, onUnmounted } from "nativescript-vue";
 
-defineProps<{
-  depth?: number;
-}>();
+defineProps({
+  depth: {
+    type: Number,
+    default: 0
+  }
+});
 
 const message = "Hello World!";
 

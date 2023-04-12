@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { goHome } from "../composables/goHome";
-
 import { useTimeAgo } from "@vueuse/core";
+import type { ListItem } from 'nativescript-vue'
 
 const navigate = () => {
   goHome();
