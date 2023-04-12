@@ -74,7 +74,9 @@ export function $navigateTo(
 
     let view = createNativeView<Page>(target, options?.props);
 
-    const page = view.mount();
+    view.mount();
+
+    const page = view.nativeView
     const dispose = page.disposeNativeView;
 
     page.disposeNativeView = () => {

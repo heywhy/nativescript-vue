@@ -92,7 +92,9 @@ export async function $showModal<T = any>(
     view.context.config.globalProperties.$closeModal = closeModal;
     view.context.config.globalProperties.$modal = { close: closeModal };
 
-    const modalContent = view.mount();
+    view.mount();
+
+    const modalContent = view.nativeView;
 
     modalTarget.showModal(modalContent, {
       ...options,

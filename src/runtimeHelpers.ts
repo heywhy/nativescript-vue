@@ -22,8 +22,8 @@ export const createNativeView = <T = View>(component: Component, props?: Props) 
     get nativeView(): T {
       return vnode.el.nativeView;
     },
-    mount(root: NSVNode = new NSVRoot()): T {
-      if (isMounted) return vnode.el.nativeView;
+    mount(root: NSVNode = new NSVRoot()) {
+      if (isMounted) return vnode;
 
       vnode = h(component, props);
 
@@ -34,7 +34,7 @@ export const createNativeView = <T = View>(component: Component, props?: Props) 
       isMounted = true;
       container = root;
 
-      return vnode.el.nativeView;
+      return vnode;
     },
     unmount() {
       if (!isMounted) return;
