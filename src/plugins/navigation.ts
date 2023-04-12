@@ -65,16 +65,14 @@ export function $navigateTo(
   target: Component,
   options?: NavigationOptions
 ) {
-  // console.log("$navigateTo");
-
   try {
-    const frame = resolveFrame(options.frame);
+    const frame = resolveFrame(options?.frame);
 
     if (!frame) {
       throw new Error("Failed to resolve frame. Make sure your frame exists.");
     }
 
-    let view = createNativeView<Page>(target, options.props);
+    let view = createNativeView<Page>(target, options?.props);
 
     const page = view.mount();
     const dispose = page.disposeNativeView;
