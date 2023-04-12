@@ -1,5 +1,5 @@
 import { NSVElement } from "../../dom";
-import { NormalizedStyle } from "@vue/shared";
+import type { NormalizedStyle } from "@vue/shared";
 
 type Style = string | null;
 

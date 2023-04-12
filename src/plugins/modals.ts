@@ -6,8 +6,7 @@ import {
   Ref,
   warn,
 } from "@vue/runtime-core";
-import { Application, ShowModalOptions, View } from "@nativescript/core";
-import { isObject } from "@vue/shared";
+import { Application, ShowModalOptions, Utils, View } from "@nativescript/core";
 import { NSVElement } from "../dom";
 import { createNativeView } from "../runtimeHelpers";
 
@@ -48,7 +47,7 @@ export function install(app: App) {
 }
 
 function resolveModalTarget(target: ResolvableModalTarget): View | false {
-  if (isObject(target) && isObject(target.$el)) {
+  if (Utils.isObject(target) && Utils.isObject(target.$el)) {
     return target.$el.nativeView;
   } else if (target instanceof NSVElement) {
     return target.nativeView;
