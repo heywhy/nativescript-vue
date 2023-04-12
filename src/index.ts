@@ -29,6 +29,7 @@ init();
 export * from "./dom";
 export * from "./registry";
 export * from "./renderer";
+export { ListItem } from './components/ListView'
 export { createNativeView } from "./runtimeHelpers";
 
 export * from "@vue/runtime-core";
