@@ -10,7 +10,7 @@ import { renderer } from "./renderer";
 import { install as modalsPlugin } from "./plugins/modals";
 import { install as navigationPlugin } from "./plugins/navigation";
 import { isKnownView, registerElement } from "./registry";
-import { setRootContext } from './runtimeHelpers'
+import { setRootContext } from "./runtimeHelpers";
 
 declare module "@vue/runtime-core" {
   interface App {
@@ -29,7 +29,7 @@ init();
 export * from "./dom";
 export * from "./registry";
 export * from "./renderer";
-export { ListItem } from './components/ListView'
+export * from "./components";
 export { createNativeView } from "./runtimeHelpers";
 
 export * from "@vue/runtime-core";

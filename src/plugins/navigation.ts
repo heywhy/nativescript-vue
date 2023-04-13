@@ -4,7 +4,7 @@ import { NSVElement } from "../dom"
 import { createNativeView } from "../runtimeHelpers"
 
 declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
+  export interface ComponentCustomProperties {
     /**
      * todo: update docblock
      * Navigate to {target} component.

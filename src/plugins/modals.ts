@@ -1,3 +1,4 @@
+import { Application, ShowModalOptions, Utils, View } from "@nativescript/core";
 import {
   App,
   Component,
@@ -6,12 +7,11 @@ import {
   Ref,
   warn,
 } from "@vue/runtime-core";
-import { Application, ShowModalOptions, Utils, View } from "@nativescript/core";
 import { NSVElement } from "../dom";
 import { createNativeView } from "../runtimeHelpers";
 
 declare module "@vue/runtime-core" {
-  interface ComponentCustomProperties {
+  export interface ComponentCustomProperties {
     /**
      * todo: update docblock
      */
@@ -79,10 +79,13 @@ export async function $showModal<T = any>(
   }
 
   return new Promise((resolve) => {
+    let isResolved = false;
     let view = createNativeView(component, options.props);
-    const closeModal = (...args: any[]) => modalContent.closeModal(...args);
 
+    const closeModal = (...args: any[]) => modalContent.closeModal(...args);
     const closeCallback = (data?: T) => {
+      if(isResolved) return;
+      isResolved = true;
       view.unmount();
       view = null;
 

@@ -42,6 +42,8 @@ onUnmounted(() => {
       <Label class="info" :text="message + ' ' + depth" />
       <Button text="Go home" @tap="goHome(depth + 1)" />
       <Button text="Go home Modal" @tap="goHome(depth + 1, true)" />
+      <Button text="Close Modal" @tap="$modal?.close({ depth, foo: 'bar' })" />
+
       <Test />
 
       <template v-if="depth > 2">
