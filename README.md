@@ -19,7 +19,9 @@ NativeScript-Vue with Vue3 support now in beta!
 
 ## Quick start
 
-To get started, you can use the [StackBlitz Template](https://stackblitz.com/fork/nativescript-vue3-beta)
+<!-- To get started, you can use the [StackBlitz Template](https://stackblitz.com/fork/nativescript-vue3-beta) -->
+
+To get started, you can use the [StackBlitz Template](https://stackblitz.com/fork/github/nativescript-vue/nativescript-vue/tree/main/packages/stackblitz-template?file=src%2Fcomponents%2FHome.vue&title=NativeScript%20Starter%20Vue3%20Beta)
 
 ...or locally:
 
