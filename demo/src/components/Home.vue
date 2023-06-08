@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ListItem, onMounted, onUnmounted } from 'nativescript-vue';
+import { ListItem, onMounted, onUnmounted, useModal } from 'nativescript-vue';
 import { goHome } from '../composables/goHome';
 import Test from './Test.vue';
 
@@ -9,6 +9,8 @@ defineProps({
     default: 0,
   },
 });
+
+const { current: currentModal } = useModal();
 
 const message = 'Hello World!!';
 
@@ -46,7 +48,10 @@ onUnmounted(() => {
       <Label class="info" :text="message + ' ' + depth" />
       <Button text="Go home" @tap="goHome(depth + 1)" />
       <Button text="Go home Modal" @tap="goHome(depth + 1, true)" />
-      <Button text="Close Modal" @tap="$modal?.close({ depth, foo: 'bar' })" />
+      <Button
+        text="Close Modal"
+        @tap="currentModal.close({ depth, foo: 'bar' })"
+      />
 
       <Test />
 

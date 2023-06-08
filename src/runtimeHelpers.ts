@@ -23,12 +23,20 @@ export const setRootContext = (context: AppContext) => {
 export const createNativeView = <T = View>(
   component: Component,
   props?: Props,
-  contextOverrides?: any
+  contextOverrides?: object
 ) => {
   let vnode: VNode;
   let isMounted = false;
   let container: NSVNode;
-  const context = { ...rootContext, ...contextOverrides };
+
+  // here we make a copy of the root context so that mutations
+  // don't override the root context while we take advantage of
+  // the prototype chain in javascript objects
+  const context: AppContext = {
+    ...rootContext,
+    provides: Object.create(rootContext.provides),
+    ...contextOverrides,
+  };
 
   type M = VNode<RendererNode, RendererElement, { nativeView: T }>;
 

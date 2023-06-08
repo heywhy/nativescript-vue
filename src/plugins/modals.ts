@@ -3,7 +3,9 @@ import {
   App,
   Component,
   ComponentPublicInstance,
+  InjectionKey,
   Ref,
+  inject,
   unref,
   warn,
 } from '@vue/runtime-core';
@@ -12,7 +14,7 @@ import { createNativeView } from '../runtimeHelpers';
 import { isObject } from '@vue/shared';
 
 declare module '@vue/runtime-core' {
-  export interface ComponentCustomProperties {
+  interface ComponentCustomProperties {
     /**
      * todo: update docblock
      */
@@ -20,10 +22,6 @@ declare module '@vue/runtime-core' {
       component: Component,
       options?: ModalOptions
     ) => Promise<T | false | undefined>;
-    $closeModal: (arg: any) => void;
-    $modal: {
-      close: (arg: any) => void;
-    };
   }
 }
 
@@ -41,9 +39,14 @@ export function install(app: App) {
   app.config.globalProperties.$showModal = $showModal;
 }
 
+export const useModal = () => ({
+  showModal: $showModal,
+  current: inject(MODAL),
+});
+
 function resolveModalTarget(
   target: Ref<ResolvableModalTarget> | ResolvableModalTarget
-): View | false {
+): View | undefined {
   const ob = unref<ResolvableModalTarget>(target);
 
   if (ob instanceof NSVElement) {
@@ -53,9 +56,11 @@ function resolveModalTarget(
   } else if (isObject(ob) && isObject(ob.$el)) {
     return ob.$el.nativeView;
   }
-
-  return false;
 }
+
+type Modal = { close: (...args: any[]) => void };
+
+const MODAL: InjectionKey<Modal | undefined> = Symbol('ns:modal');
 
 export async function $showModal<T = any>(
   component: Component,
@@ -118,10 +123,12 @@ export async function $showModal<T = any>(
         ...additionalOptions,
       });
     };
+
     const closeModal = (...args: any[]) => view.nativeView?.closeModal(...args);
 
-    view.context.config.globalProperties.$closeModal = closeModal;
-    view.context.config.globalProperties.$modal = { close: closeModal };
+    view.context.provides[MODAL as any] = {
+      close: closeModal,
+    };
 
     view.mount(root);
     openModal();

@@ -1,8 +1,8 @@
-import { createApp } from 'nativescript-vue';
+import { createApp, h } from 'nativescript-vue';
 
-import App from './components/demo_ListView.vue';
+import App from './components/Home.vue';
 
-createApp(App)
+createApp({ render: () => h('Frame', {}, [h(App)]) })
   .use(() => {
     console.log('test1');
   })
